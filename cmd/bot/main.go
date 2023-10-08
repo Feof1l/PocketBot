@@ -38,11 +38,11 @@ func main() {
 	//authorizationServer := server.NewAuthorizationServer(pocketClient, tokenRepository, "http://localhost/")
 
 	go func() {
-		if err := authorizationServer.Start(); err != nil {
+		if err := telegramBot.Start(); err != nil {
 			log.Fatal(err)
 		}
 	}()
-	if err := telegramBot.Start(); err != nil {
+	if err := authorizationServer.Start(); err != nil {
 
 		log.Fatal(err)
 	}
