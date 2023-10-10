@@ -2,7 +2,7 @@ package server
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -25,12 +25,10 @@ func (s *AuthorizationServer) Start() error {
 		Addr:    ":8080",
 		Handler: s,
 	}
-	fmt.Println("Server is running")
 	return s.server.ListenAndServe()
 
 }
 func (s *AuthorizationServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Handler is running")
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusForbidden)
 		return
@@ -39,22 +37,23 @@ func (s *AuthorizationServer) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	chatIDQuery := r.URL.Query().Get("chat_id")
 	if chatIDQuery == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Println(http.StatusBadRequest)
 		return
 	}
 
 	chatID, err := strconv.ParseInt(chatIDQuery, 10, 64)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Println(http.StatusBadRequest)
 		return
 	}
 
 	requestToken, err := s.tokenRepository.Get(chatID, repository.RequestTokens)
+
 	if err != nil {
+
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
+
 	authResp, err := s.pocketClient.Authorize(r.Context(), requestToken)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -64,10 +63,13 @@ func (s *AuthorizationServer) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
+
 	}
+	log.Printf("chat id: %d\nrequest_token: %s\naccess_token: %s\n", chatID, requestToken, authResp.AccessToken)
 
 	w.Header().Add("Location", s.redirectUrl)
 	w.WriteHeader(http.StatusMovedPermanently)
+
 }
 
 func (s *AuthorizationServer) createAccessToken(ctx context.Context, chatID int64) error {

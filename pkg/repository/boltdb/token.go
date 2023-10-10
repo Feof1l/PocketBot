@@ -2,6 +2,7 @@ package boltdb
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 
 	"github.com/boltdb/bolt"
@@ -28,6 +29,7 @@ func (r *TokenRepository) Get(chatID int64, bucket repository.Bucket) (string, e
 	err := r.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucket))
 		data := b.Get(intToBytes(chatID))
+		fmt.Println(string(data))
 		token = string(data)
 		return nil
 	})

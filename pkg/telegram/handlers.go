@@ -20,14 +20,14 @@ func (b *Bot) handleMessage(message *tgbotapi.Message) error {
 	_, err := url.ParseRequestURI(message.Text)
 	if err != nil {
 		msg.Text = "Это невалидная ссылка!"
-		_, err := b.bot.Send(msg)
+		_, err = b.bot.Send(msg)
 		return err
 	}
 
 	accessToken, err := b.getAccessToken(message.Chat.ID)
 	if err != nil {
 		msg.Text = "Ты не авторизирован!Иcпользуй команду /start"
-		_, err := b.bot.Send(msg)
+		_, err = b.bot.Send(msg)
 		return err
 
 	}
@@ -36,12 +36,12 @@ func (b *Bot) handleMessage(message *tgbotapi.Message) error {
 		URL:         message.Text,
 	}); err != nil {
 		msg.Text = "Увы,не удалось сохранить ссылку.Попробуй еще раз позже!"
-		_, err := b.bot.Send(msg)
+		_, err = b.bot.Send(msg)
 		return err
 	}
 	//msg.ReplyToMessageID = update.Message.MessageID
 
-	b.bot.Send(msg)
+	_, err = b.bot.Send(msg)
 	return err
 }
 func (b *Bot) handleCommand(message *tgbotapi.Message) error {
@@ -61,7 +61,7 @@ func (b *Bot) handleStartCommand(message *tgbotapi.Message) error {
 
 	msg := tgbotapi.NewMessage(message.Chat.ID, replyAlreadyAuthorized)
 
-	b.bot.Send(msg)
+	_, err = b.bot.Send(msg)
 	return err
 
 }
@@ -70,3 +70,15 @@ func (b *Bot) handleUnknownCommand(message *tgbotapi.Message) error {
 	_, err := b.bot.Send(msg)
 	return err
 }
+
+/*func (b *Bot) handleMachineCommand(message *tgbotapi.Message) error {
+	cpu, _ := ghw.CPU()
+	memory, _ := ghw.Memory()
+	topology, _ := ghw.Topology()
+	messageText := "информация о процессорах в хост-системе:" + cpu.String() + "информация о оперативной памяти в хост-системе" +
+		memory.String() + "информация об архитектуре хост-компьютера (NUMA против SMP), расположении узлов NUMA хоста и кэшах памяти, специфичных для процессора" +
+		topology.String()
+	msg := tgbotapi.NewMessage(message.Chat.ID, messageText)
+	_, err := b.bot.Send(msg)
+	return err
+}*/
